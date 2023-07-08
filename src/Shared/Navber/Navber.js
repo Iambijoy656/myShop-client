@@ -1,9 +1,11 @@
 import React, { useContext } from "react";
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import { AuthContext } from "../../context/AuthProvider";
+import { CartContext } from "../../context/CartProvider";
 
 const Navber = () => {
   const { logOut, user } = useContext(AuthContext);
+  const [cart] = useContext(CartContext)
   const navigate = useNavigate();
 
   const handleLogout = () => {
@@ -34,21 +36,7 @@ const Navber = () => {
 
       <li>
         <NavLink
-          to="/about"
-          className={({ isActive }) =>
-            isActive
-              ? "font-medium  text-orange-600 underline underline-offset-2 duration-200 bg-transparent "
-              : "font-medium  text-gray-700 transition-colors duration-200 bg-transparent"
-          }
-          end
-        >
-          About
-        </NavLink>
-      </li>
-
-      <li>
-        <NavLink
-          to="/contact"
+          to="/cart"
           className={({ isActive }) =>
             isActive
               ? "font-medium  text-orange-600 underline underline-offset-2 transition-colors duration-200 bg-transparent"
@@ -56,7 +44,10 @@ const Navber = () => {
           }
           end
         >
-          Contact
+          <div className="relative">
+            <p>Cart</p>
+            <p className="absolute bottom-2  font-bold left-8">{cart.length}</p>
+          </div>
         </NavLink>
       </li>
 
