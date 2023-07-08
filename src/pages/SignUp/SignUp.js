@@ -1,9 +1,10 @@
-import React, { useContext, useState } from "react";
+import React, { useContext } from "react";
 import { useForm } from "react-hook-form";
 import toast from "react-hot-toast";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 import { AuthContext } from "../../context/AuthProvider";
+
 
 const SignUp = () => {
   const {
@@ -11,21 +12,20 @@ const SignUp = () => {
     handleSubmit,
     formState: { errors },
   } = useForm();
-  const { createUser, updateUser, signInWithGoogle ,verifyEmail} = useContext(AuthContext);
+  const { createUser, updateUser, signInWithGoogle } = useContext(AuthContext);
+
 
   const navigate = useNavigate();
   const location = useLocation();
   const from = location?.state?.from?.pathname || "/";
 
+
+
   const handleSignUp = (data) => {
     createUser(data.email, data.password)
       .then((result) => {
         const user = result.user;
-        // console.log(user)
-        handleVerifyEmail()
         toast.success(" Created Successfully");
-        navigate('/')
-
 
         const userInfo = {
           displayName: data.name,
@@ -33,7 +33,7 @@ const SignUp = () => {
 
         updateUser(userInfo)
           .then((result) => {
-            console.log(result);
+            userSaved(data.name, data.email, data.number, data.role);
           })
           .catch((err) => {
             console.log(err);
@@ -49,30 +49,74 @@ const SignUp = () => {
       });
   };
 
+
+
+  //HAndle goole signin
   const handleGoogleSignIn = () => {
     signInWithGoogle()
       .then((result) => {
         const user = result.user;
+        const userForDB = {
+          name: user?.displayName,
+          email: user?.email,
+          number: user?.number,
+          role: "buyer",
+        };
+        console.log(userForDB);
+
+        fetch(`http://localhost:5001/users`, {
+          method: "POST",
+          headers: {
+            "content-type": "application/json",
+          },
+          body: JSON.stringify(userForDB),
+        })
+          .then((res) => res.json())
+          .then((data) => {
+            if (data.message) {
+              navigate("/");
+            }
+            if (data.acknowledged) {
+              toast.success("login successfully");
+              navigate("/");
+            }
+          });
       })
 
       .catch((error) => console.error(error));
   };
 
 
-    // veriEmail
-    const handleVerifyEmail = () => {
-      verifyEmail()
-          .then(() => {
-              toast.success('Please Check your Email and verify ')
-          })
-          .catch(error => {
-              console.error(error);
-          })
+  // save user in database
+  const userSaved = (name, email, role, number) => {
+    const user = { name, email, number, role };
+    fetch("http://localhost:5001/users", {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+      },
+      body: JSON.stringify(user),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        console.log("save data", data);
+        getUserToken(email)
+      });
+  };
+
+  // Get Token
+   const getUserToken = (email)=>{
+    if (email) {
+      fetch(`http://localhost:5001/jwt?email=${email}`)
+          .then(res => res.json())
+          .then(data => {
+              if (data.accessToken) {
+                  localStorage.setItem('accessToken', data.accessToken)
+                  navigate("/");
+              }
+          });
   }
-
-
-
-
+   }
 
   return (
     <div className="h-[800px]  flex justify-center items-center">
@@ -103,10 +147,10 @@ const SignUp = () => {
               className="select select-ghost select-bordered w-full max-w-xs"
             >
               <option disabled selected>
-                Owner Or Renter?
+                Buyer Or Seller?
               </option>
-              <option>owner</option>
-              <option>renter</option>
+              <option>buyer</option>
+              <option>seller</option>
             </select>
             {errors.name && (
               <small className="text-error pt-2">{errors.name.message}</small>
@@ -124,6 +168,20 @@ const SignUp = () => {
             />
             {errors.email && (
               <small className="text-error mt-2">{errors.email.message}</small>
+            )}
+          </div>
+          <div className="form-control w-full max-w-xs">
+            <label className="label">
+              {" "}
+              <span className="label-text">Number</span>
+            </label>
+            <input
+              type="number"
+              {...register("number", { required: "Number is required" })}
+              className="input input-bordered w-full max-w-xs"
+            />
+            {errors.number && (
+              <small className="text-error mt-2">{errors.number.message}</small>
             )}
           </div>
 
