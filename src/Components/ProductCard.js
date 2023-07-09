@@ -1,8 +1,9 @@
-import React from "react";
+import React, { useContext } from "react";
 import { Link } from "react-router-dom";
+import { AuthContext } from "../context/AuthProvider";
 
 const ProductCard = ({ product, handleAddToCart }) => {
-  console.log(product);
+  const { user } = useContext(AuthContext);
 
   const { _id, img, name, price, seller } = product;
 

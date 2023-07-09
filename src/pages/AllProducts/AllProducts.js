@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import React, { useContext, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import Loading from "../../Loading/Loading";
 import ProductCard from "../../Components/ProductCard";
@@ -20,46 +20,25 @@ const AllProducts = () => {
 
   const { user } = useContext(AuthContext);
   const [cart, setCart] = useContext(CartContext);
-
-  const handleAddToCart = (product,user) => {
-
-    if (user) {
-      fetch("http://localhost:5001/addToCart", {
-        method: "PATCH",
-        headers: {
-          "content-type": "application/json",
-        },
-        body: JSON.stringify(product),
-      })
-        .then((res) => res.json())
-        .then((data) => alert(data))
-        .catch(error => {
-            console.error('Error updating user:', error);
-          });
+  const handleAddToCart = (product) => {
+    let newCart = [];
+    const exists = cart.find(
+      (existingProduct) => existingProduct._id === product._id
+    );
+    if (!exists) {
+      product.quantity = 1;
+      newCart = [...cart, product];
     } else {
-      //   alert("modal on");
-      window.my_modal_3.showModal();
+      const rest = cart.filter(
+        (existingProduct) => existingProduct._id !== product._id
+      );
+      exists.quantity = exists.quantity + 1;
+      newCart = [...rest, exists];
     }
 
-
-    // let newCart = [];
-    // const exists = cart.find(
-    //   (existingProduct) => existingProduct._id === product._id
-    // );
-    // if (!exists) {
-    //   product.quantity = 1;
-    //   newCart = [...cart, product];
-    // } else {
-    //   const rest = cart.filter(
-    //     (existingProduct) => existingProduct._id !== product._id
-    //   );
-    //   exists.quantity = exists.quantity + 1;
-    //   newCart = [...rest, exists];
-    // }
-
-    // setCart(newCart);
-    // addToDb(product._id);
-    // toast.info("Info: Product Added!", { autoClose: 500 });
+    setCart(newCart);
+    addToDb(product._id);
+    toast.info("Info: Product Added!", { autoClose: 500 });
   };
 
   if (isLoading && !allProducts.length) return <Loading />;
@@ -78,7 +57,7 @@ const AllProducts = () => {
         ))}
         {isLoading && <Loading></Loading>}
       </div>
-      <SignUpModal></SignUpModal>
+      
     </div>
   );
 };
