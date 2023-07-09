@@ -1,4 +1,4 @@
-import React, { useContext, useState } from "react";
+import React, { useContext } from "react";
 import { useQuery } from "@tanstack/react-query";
 import Loading from "../../Loading/Loading";
 import ProductCard from "../../Components/ProductCard";
@@ -6,13 +6,14 @@ import { CartContext } from "../../context/CartProvider";
 import { addToDb } from "../../utils/fakeDB";
 import { toast } from "react-toastify";
 import { AuthContext } from "../../context/AuthProvider";
-import SignUpModal from "../../Components/SignUpModal";
 
 const AllProducts = () => {
   const { data: allProducts = [], isLoading } = useQuery({
     queryKey: ["allProducts"],
     queryFn: async () => {
-      const response = await fetch("http://localhost:5001/allProducts");
+      const response = await fetch(
+        "https://my-shop-server-phi.vercel.app/allProducts"
+      );
       const data = await response.json();
       return data;
     },
@@ -57,7 +58,6 @@ const AllProducts = () => {
         ))}
         {isLoading && <Loading></Loading>}
       </div>
-      
     </div>
   );
 };

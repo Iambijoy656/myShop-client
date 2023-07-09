@@ -64,7 +64,7 @@ const SignUp = () => {
         };
         console.log(userForDB);
 
-        fetch(`http://localhost:5001/users`, {
+        fetch(`https://my-shop-server-phi.vercel.app/users`, {
           method: "POST",
           headers: {
             "content-type": "application/json",
@@ -88,9 +88,9 @@ const SignUp = () => {
 
 
   // save user in database
-  const userSaved = (name, email, role, number) => {
+  const userSaved = (name, email,  number,role) => {
     const user = { name, email, number, role };
-    fetch("http://localhost:5001/users", {
+    fetch("https://my-shop-server-phi.vercel.app/users", {
       method: "POST",
       headers: {
         "content-type": "application/json",
@@ -107,7 +107,7 @@ const SignUp = () => {
   // Get Token
    const getUserToken = (email)=>{
     if (email) {
-      fetch(`http://localhost:5001/jwt?email=${email}`)
+      fetch(`https://my-shop-server-phi.vercel.app/jwt?email=${email}`)
           .then(res => res.json())
           .then(data => {
               if (data.accessToken) {
